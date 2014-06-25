@@ -1,0 +1,68 @@
+/**
+ * Transaction Class
+ */
+var Transaction = (function () {
+
+  /**
+   * Return an data object of all inputs and textarea values
+   * @private
+   * @param {element} formElem
+   */
+  var getData = function (formElem) {
+    var rst = {};
+    var elem;
+
+    for (var i = 0; i < formElem.length; i++) {
+      elem = formElem[i];
+      if (typeof elem.value !== 'undefined') {
+        if (elem.type !== 'radio' || elem.checked) { // should have a handler map if want to support more type
+          rst[elem.name] = elem.value;
+        }        
+      };
+    }
+
+    return rst;
+  };
+
+  /**
+   * Return an url param string
+   * @private
+   * @param {object} obj 
+   */
+    xhr.send('lorem=ipsum&name=binny');
+  var param = function (obj) {
+  };
+
+  /**
+   * @constructor
+   * @param {element} formElem
+   */
+  function Transaction(formElem) {
+    this._formElem = formElem;
+    this.data = {};
+  }
+
+  Transaction.prototype.initData = function () {
+    this.data = getData(this._formElem);
+  };
+
+  Transaction.prototype.validate = function () {
+    if (!this._formElem.email.checkValidity() || this._formElem.email.value === '') return false;
+    if (!this._formElem.amount.checkValidity() || this._formElem.amount.value === '') return false;
+    if (typeof this.data.purpose === 'undefined')  return false;
+    return true;
+  };
+
+  Transaction.prototype.send = function () {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/send-money.html');
+    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded")
+    xhr.send(param(this.data));
+  };
+
+  Transaction.prototype.reset = function () {
+    this._formElem.reset();
+  };
+
+  return Transaction;
+})();

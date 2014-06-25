@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, maximum-scale=1">
+  <title>Paypal Exercise</title>
+  <link rel="stylesheet" href="css/app.css" type="text/css" />
+  <script src="js/Transaction.js"></script>
+  <script>
+    window.onload = function () {
+      var trans = new Transaction(document.getElementById('trans-form'));
+
+      // validate an input element
+      var validate = function (elem) {
+        if (elem.checkValidity() && elem.value !== '') {
+          elem.nextElementSibling.classList.add('pass');
+          elem.nextElementSibling.classList.remove('fail');
+        } else {
+          elem.nextElementSibling.classList.add('fail');
+          elem.nextElementSibling.classList.remove('pass');
+        }
+      };
+
+      var currencySymbolMap = {
+        USD: '&#36;',
+        EUR: '&#128;',
+        JPY: '&#165;'
+      };
+
+      var currencySymbol = document.querySelector('.currency-symbol'),
+          mask = document.querySelector('#mask'),
+          transInfo = document.querySelector('#trans-info'),
+          completeMsg = document.querySelector('#complete-msg'),
+          personMsg = document.querySelector('.person-msg', completeMsg),
+          amountMsg = document.querySelector('.amount-msg', completeMsg),
+          currencyMsg = document.querySelector('.currency-msg', completeMsg),
+          transFooter = document.querySelector('#trans-footer'),
+          completeFooter = document.querySelector('#complete-footer');
+
+      var interactions = [
+        {
+          elem: document.querySelector('[name=email]'),
+          type: ['keyup'],
+          listener: function () {
+            validate(this);
+          } 
+        },
+        {
+          elem: document.querySelector('[name=amount]'),
+          type: ['keyup', 'change'],
+          listener: function () {
+            validate(this);
+            if (this.value !== '') {
+              currencySymbol.style.display = 'inline';
+            } else {
+              currencySymbol.style.display = 'none';
+            }
+          }
+        },
+        {
+          elem: document.querySelector('select[name=currency]'),
+          type: ['change'],
+          listener: function () {
+            currencySymbol.innerHTML = currencySymbolMap[this.value];
+          }
+        },
+        {
+          elem: document.querySelector('#clear-trans'),
+          type: ['click'],
+          listener: function () {
+            trans.reset();
+          }
+        },
+        {
+          elem: document.querySelector('#send-trans'),
+          type: ['click'],
+          listener: function () {
+            trans.initData();
+            if (trans.validate()) {
+              mask.style.display = 'block';      
+              trans.send(function (event) {
+                var resObj = JSON.parse(this.response);
+
+                mask.style.display = 'none';
+                transInfo.style.display = 'none';
+                transFooter.style.display = 'none';
+
+                personMsg.innerHTML = resObj.email;
+                amountMsg.innerHTML = resObj.amount;
+                currencyMsg.innerHTML = currencySymbolMap[resObj.currency];
+
+                completeMsg.style.display = 'block';
+                completeFooter.style.display = 'flex';
+              });
+            }
+          }
+        }
+      ];
+
+      // bind event listeners
+      for (var i = 0; i < interactions.length; i++) {
+        for (var j = 0; j < interactions[i].type.length; j++) {
+          interactions[i].elem.addEventListener(interactions[i].type[j], interactions[i].listener);
+        }
+      }
+    };
+  </script>
+</head>
+<body id="send-money">
+  <header>
+    <div class="content text-center">
+      <h2 class="title">Send Money</h2>
+    </div>
+  </header>
+  <div id="main">
+    <section id="trans-info">
+      <div class="content">
+        <form id="trans-form">
+          <fieldset id="email-field" class="container1 frame">
+            <input type="email" name="email" placeholder="To:" />
+            <div class="verification">
+              <div class="icon green text-center">&#10004;</div>
+              <div class="icon red text-center">&#10006;</div>
+            </div>
+          </fieldset>
+          <fieldset id="amount-field" class="container1 frame">
+            <span class="currency-symbol">&#36;</span>
+            <input type="number" name="amount" min="0" placeholder="Amount:" />
+            <div class="verification">
+              <div class="icon green text-center">&#10004;</div>
+              <div class="icon red text-center">&#10006;</div>
+            </div>
+            <select name="currency">
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+              <option value="JPY">JPY</option>
+            </select>
+          </fieldset>
+          <textarea name="message" rows="5" class="container1" form="trans-form" placeholder="Message (optional):"></textarea>
+          <h3 class="purpose-title">What's this payment for?</h3>
+          <fieldset id="purpose-field" class="container1 frame">
+            <input type="radio" name="purpose" id="family" value="I'm sending money to family or friends" /><label for="family">I'm sending money to family or friends</label>
+            <hr />
+            <input type="radio" name="purpose" id="goods" value="I'm paying for goods or services" /><label for="goods">I'm paying for goods or services</label>
+          </fieldset>
+        </form>
+      </div>
+    </section>
+    <section id="complete-msg">
+      <div class="content">
+        <h3 class="text-center">You have sent <span class="currency-msg"></span><span class="amount-msg"></span> to <span class="person-msg"></span></h3>
+        <h1 class="ok-msg text-center">&#10003;</h1>
+      </div>
+    </section>
+  </div>
+  <footer>
+    <div id="trans-footer" class="content row">
+      <button type="button" id="clear-trans" class="w40">Clear</button>
+      <button type="button" id="send-trans" class="w40">Next</button>
+    </div>
+    <div id="complete-footer" class="content row">
+      <button type="button" class="w40" onclick="window.location.reload()">Send Money</button>
+      <button type="button" class="w50" onclick="window.location='/transaction-history.html'">Transaction History</button>
+    </div>
+  </footer>
+  <div id="mask">
+    <div class="content text-center">
+      <img class="loading" src="img/loading.gif" />
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, maximum-scale=1">
+  <title>Paypal Exercise</title>
+  <link rel="stylesheet" href="css/app.css" type="text/css" />
+  <script>
+    window.onload = function () {
+      // return a li html string with data bind in
+      var template =  function (odevity, date, email, currency, amount) {
+        return '<li class="' + odevity + '">' + 
+        '<div class="content row">' +
+        '<div>' + date + '</div>' +
+        '<div>' + email + '</div>' + 
+        '<div>' + currency + amount + '</div>' +
+        '</div>' +
+        '</li>'
+      };
+
+      var htmlStr = '';
+      var currencySymbolMap = {
+        USD: '&#36;',
+        EUR: '&#128;',
+        JPY: '&#165;'
+      };
+
+      var xhr = new XMLHttpRequest();
+      xhr.open('Get', '/read');
+      xhr.onload = function () {
+        var resObj = JSON.parse(this.response);
+        for (var i = 0; i < resObj.length; i++) {
+          htmlStr += template(
+            (i % 2 == 0) ? 'even' : 'odd',
+            resObj[i].date,
+            resObj[i].email,
+            currencySymbolMap[resObj[i].currency],
+            resObj[i].amount
+          );
+        }
+        document.querySelector('.trans-list').innerHTML = htmlStr;
+      };
+      xhr.send();
+    };
+  </script>
+</head>
+<body id="trans-history">
+  <header>
+    <div class="content text-center">
+      <h2 class="title">Transaction History</h2>
+    </div>
+  </header>
+  <div id="main">
+    <ul class="trans-list"></ul>
+  </div>
+  <footer>
+    <div class="content">
+      <button type="button" class="w100" onclick="window.location='index.html'">Back</button>
+    </div>
+  </footer>
+</body>
+</html>
