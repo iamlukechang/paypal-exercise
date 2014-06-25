@@ -9,7 +9,7 @@ PayPal Application Engineer UI Take Home Exercise
 $ npm install
 ```
 
-## Geting Start 
+## Getging Start 
 
 Please run mongodb on it's default port, 27017, and run the simple express server index.js:
 (Don't forget to set the permission to the mongodb data directory if this is your first time installing mongodb on ths machine)
